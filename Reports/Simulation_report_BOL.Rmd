@@ -1,5 +1,58 @@
+---
+title: "Simulation of a forest of growing trees"
+author: "Barbara Oliveira De Loreto"
+date: "2024-04-28"
+output: html_document
+bibliography: Bibliography.bib
+---
+
+```{r motivation for the model, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Report on simulation of a forest of growing trees
+
+## Motivation for the model extensions
+
+The existing individual-based model of tree growth in a forest was a great start and already included some important concepts. It already included the concept of maximum growth, production of offsprings with a certain probability and death. It also included as parameters, the maximum number of trees and size of the forest as well as a rate of growth per time step. 
+However, the models lacked in some elements that would make the model more realistic. In order to identify those extensions, a basic literature research was undertaken. In order to focus the search, an assumption was made that the forest is in Australia and mostly composed of trees from eucalyptus trees (from various species). The literature review focused on  four aspects of plant ecology: reproduction maturity, tree growth rate, death probability and dispersal.
+
+[@Ngugi2015] looked at a large dataset of Eucalyptus and other Australian native trees. The study reports on diameter growth range per year as several factors would influence the growth of a plant. Other studies seem to even take a step further and use a diameter distribution for tree growth simulations [@Tian2020]. It is also clear that most trees continue to grow even after producing offsprings for the first time.
+Seedlings tend to be more vulnerable to predation, competition and environmental fators and therefore a unique death rate was establish to plants up to age of 3.
+Lastly, seed dispersal studies assess the distance a seeds fall and germinate from the originary tree. Dispersal distance can be influenced by various factors but the key one is the location of the original tree. So the model included the location of new seedlings based on the location of the mother tree and a dispersal rate [@Booth2017].
+
+## Description of my model
+
+The model was designed to take an initial forest with a certain number of trees in certain locations and with certain characteristics and model tree growth, including death and reproduction (new seedlings), according to a list of parameters and a number of time steps.
+This model, includes 10 parameters, a key object, the initial forest, which includes 6 variables for each tree, some of which will vary through time. The model also considers the number of time steps and the initial number of trees as key variables.
+The variables collected for each tree in the initial forest and the model of the forest through time are:
+* ID – unique identified for each tree
+* Alive – condition of the tree in terms of dead or alive (if tree is alive this variable is TRUE)
+* x – coordinate x for the tree location in the forest
+* y – coordinate y for the tree location in the forest
+* r – radius of a tree in centimetres, derived from the diameter at chest hight
+* A – age of the tree. (estimate for the initial forest based on radius and mean growth rate, and then calculated in terms of time steps) 
+
+The parameters used in the modelling of the forest through time are:
+* maxTRees – the maximum number of trees the forest/model handles
+* maxx – the maximum size of the forest in terms of x coordinate
+* maxy - the maximum size of the forest in terms of y coordinate
+* maxr – the maximum radius that each tree could get
+* maturityr – the radius when a plant reaches maturity
+* gamma_max – top of the range for the growth rate per time step
+* gamma_min – bottom of the range for growth rate per time step
+* mu - mortality probability per time step for trees over 3 years
+* mu_under_3 – mortality probability for plants under 3 years
+* lambda - probability of producing surviving offspring after reaching maturity, per time step.
+* d – maximum dispersal distance.
+
+## The code
+
+Below is the code used for this simulation.
+
+```{r code, echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
 # Simple simulation of a forest of growing trees_modification on t_steps and maximnum number of trees
-# Authors: Jan Engelstaedter & Daniel Ortiz-Barrientos
+# modified from: Jan Engelstaedter & Daniel Ortiz-Barrientos
 # Date: 28/4/2021
 
 library(animation)
@@ -32,7 +85,8 @@ iniForest <- data.frame(ID    = 1:nini,                             # ID for eac
                         y     = runif(nini, min = 0, max = p$maxy), # y position
                         r     = runif(nini, min = 0, max = p$maxr), # radius
                         a     = NA)                                 # age
-iniForest$a <- iniForest$r/((p$gamma_max + p$gamma_min)/2) # expected age based on their size using mean o gamma_mx and gamma_min
+
+iniForest$a <- iniForest$r/((p$gamma_max + p$gamma_min)/2) # estimation of trees age based on their size using mean o gamma_max and gamma_min
 
 
 # core simulation function:
@@ -48,8 +102,10 @@ simulateForest <- function(iniForest, tmax, p) {
     ftt[[i + 1]][1:nrow(ftt[[i]]),] <- ftt[[i]]
     # indices of living trees:
     alive <- which(ftt[[i + 1]]$alive)
+    
     # aging all trees:
     ftt[[i + 1]]$a[alive] <- ftt[[i + 1]]$a[alive] + 1
+   
     # growing trees:
     canGrow <- which(ftt[[i + 1]]$alive & ftt[[i + 1]]$r < p$maxr)
     ftt[[i + 1]]$r[canGrow] <- ftt[[i + 1]]$r[canGrow] + runif(1, max = p$gamma_max, min = p$gamma_min)  #growth based on a random number from a range
@@ -112,4 +168,11 @@ forestMovie <- function(ftt, p, interval = 0.1) {
 # running the simulation:
 simResult <- simulateForest(iniForest, tmax, p)
 saveGIF(forestMovie(simResult, p), movie.name = "first_forest_movie_10.gif")
+```
+
+## Description of the results
+
+## Conclusion
+
+## References
 

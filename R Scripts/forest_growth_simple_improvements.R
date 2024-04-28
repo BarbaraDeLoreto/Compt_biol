@@ -1,6 +1,6 @@
-# Simple simulation of a forest of growing trees_modification on t_steps and maximnum number of trees
-# Authors: Jan Engelstaedter & Daniel Ortiz-Barrientos
-# Date: 28/4/2021
+# modified simulation of a forest of growing trees
+# Authors: Barbara Oliveira De Loreto, modified from : Jan Engelstaedter & Daniel Ortiz-Barrientos
+# Date: 28/4/2024
 
 library(animation)
 library(plotrix)
