@@ -1,4 +1,4 @@
-# Simple simulation of a forest of growing trees_modification on t_steps and maximnum number of trees
+# Simple simulation of a forest of growing trees 
 # Authors: Barbara Oliveira De Loreto adapted from Jan Engelstaedter & Daniel Ortiz-Barrientos
 # Date: 01/05/2021
 
@@ -280,5 +280,10 @@ plot3density <- ggplot() +
 
 # Save as JPG
 ggsave(filename = "../Plots/Desity3models.jpg", plot = plot3density, width = 6, height = 4)
+
+
+
+
+
 
 

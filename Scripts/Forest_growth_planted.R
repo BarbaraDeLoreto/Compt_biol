@@ -178,6 +178,10 @@ forestMovie <- function(ftt, p, interval = 0.1) {
   }
   invisible(NULL)
 }
+# Simple simulation of a forest of growing trees PLANTED FOREST
+# Authors: Barbara Oliveira De Loreto adapted from Jan Engelstaedter & Daniel Ortiz-Barrientos
+# Date: 01/05/2021
+
 
 ##Planted forest in rows
 # running the simulation for planted_forest:

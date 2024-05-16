@@ -1,3 +1,5 @@
+#####FOR HPC SIMULATION###############################
+
 ## step 1: obtain batch number from command line argument:
 # not required for this one simulation
 
@@ -147,11 +149,72 @@ simResult <- simulateForest(iniForest, tmax, p)
 ## step 3: saving the result as a file:
 
 #save results
-dput(simResult, "Tree_growth_sim_HPC_15.txt")
+dput(simResult, "Tree_growth_sim_HPC_150.txt")
 
 
-###
-# bring output back
-#new_dataframe <- source("Tree_growth_sim_HPC_150.txt")
+
+#bring output back
+HPC_results <- source("Tree_growth_sim_HPC_150.txt")
+
+
+
+# plotting the forest at a given time:
+plotForest <- function(forest, p) {
+  forest <- forest[order(forest$alive),]
+  par(mar=c(0,0,0,0))
+  plot(0, xlim = c(0, p$maxx), ylim = c(0, p$maxy), type='n', axes=FALSE, ann=FALSE)
+  cols <- ifelse(forest$alive, hsv(0.15 + (forest$ID %% 11)/30, 
+                                   0.8 + (forest$ID %% 5)/40, 
+                                   0.4 + (forest$ID %% 7)/30), "grey")
+  for(i in 1:nrow(forest))
+    draw.circle(forest$x[i], forest$y[i], forest$r[i], col = cols[i], border = cols[i])
+}
+
+
+
+# plotting forest growth through time as a video:
+forestMovie <- function(ftt, p, interval = 0.1) {
+  ani.options(interval = interval)
+  for (i in 1:length(ftt)) {
+    dev.hold()
+    plotForest(ftt[[i]], p)
+    text(x = 0, y = 1, adj = c(0, 1), label = paste0("time=",i),
+         col = "red", cex = 1.5)
+    ani.pause()
+  }
+  invisible(NULL)
+}
+
+
+################################################################################
+###Visuals
+
+
+# producing the giff:
+saveGIF(forestMovie(HPC_results, p), movie.name = "C:/Users/badel/Documents/Assignment_Compt_biol_2/Images/forest_growth_movie_25h70t.gif")
+
+
+# Plotting tree numbers is achieved
+data_HPC <- data.frame(time = 1:tmax, n_trees = NA)
+
+for (i in 1:tmax) {
+  data_HPC$n_trees[i] <- sum(HPC_results[[i + 1]]$alive)
+}
+
+# Call the pdf command to start the plot
+pdf(file = "../Plots/HPC_25h_70t.pdf",   
+    width = 4, # The width of the plot in inches
+    height = 4) # The height of the plot in inches
+
+#density plot
+ggplot(data_r, aes(time, n_trees))+
+  geom_line() +
+  labs(x = "Time", y = "Number of Trees") +
+  ggtitle("Number of Trees Over Time") +
+  geom_hline(yintercept = 150, linetype = "dashed", color = "red3") +
+  geom_hline(yintercept = 200, linetype = "dashed", colour = "red3")
+
+# create the file
+dev.off()
 
 
