@@ -12,10 +12,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Report on simulation of a forest of growing trees
 
-## Motivation for the model extensions
+## Motivation for the model
 
-The motivation for this simulation was a question that is relevant in the fields of Carbon Farming and landscape conservation: how long would it take for a initial stand of trees to reach a target density value?
-Carbon farming projects that focus on vegetation methods often have specific tree densities they need to achieve [@CERGuide] [@CERAvoidedClearing]. In addition, from a landscape conservation perspective, a forest with more than 20 per cent canopy covers is considered to be a woodland forest [@AustraliaSOF2018] and may have more specific managements requirements and legislative protections [@QLDEucalyptWoodlands].
+The motivation for this simulation was a question that is relevant in the fields of carbon farming and landscape conservation: **how long would it take for a initial stand of trees to reach a target density value?**
+Carbon farming projects that focus on vegetation methods often have specific tree densities they need to achieve [@CERGuide] [@CERAvoidedClearing]. 
+In addition, from a landscape conservation perspective, a forest with more than 20 per cent canopy covers is considered to be a woodland forest [@AustraliaSOF2018] and may have more specific managements requirements and legislative protections [@QLDEucalyptWoodlands].
 In addition to the main question, secondary questions were:
 
 * If the initial stand is planted in rows, does that affect the timing of reaching the desired density?
@@ -23,21 +24,21 @@ In addition to the main question, secondary questions were:
 * Is the model reasonable in simulating at a small (1ha) and large (25ha) scale?
 * Since a key management action in certain forests is weed control to support survival of young trees, does improving survival rate by 10% affect the timing of achieving the desired density significantly?
 
-A concise literature review was carried out on key aspects of eucalyptus biology and ecology to better establish the parameters of the model. The research identified relevant studies in the field of plant growth rate, and survival rate [@Ngugi2015] and [@Tian2020] as well as dispersal [@Booth2017].  
+A concise literature review was carried out on key aspects of eucalyptus biology and ecology to better establish the parameters of the model. The research identified relevant studies in the field of plant growth rate, and survival rate [@Ngugi2015] [@Tian2020] as well as dispersal [@Booth2017].  
 
-## Description of my model
+## Description of the model
 
-The provided individual-based model of tree growth in a forest was a great start and already included some important concepts. However, the models lacked in some elements that would make the model more realistic. In addition, for the model to be feasible given th task, some assumptions had to be made:
+The provided individual-based model of tree growth in a forest was a great start and already included some important concepts. However, the model lacked in some elements that would make the model more realistic. In addition, for the model to be feasible given the task, some assumptions had to be made:
 
-1. The forest is in Australia and mostly composed of trees from eucalyptus trees (from species with similar characteristics).
+1. The forest is in Australia and mostly composed of eucalyptus trees (from species with similar characteristics).
 2. No fire events occurred during the time period.
 3. 20 per cent canopy cover is achieved with a number of trees between 150 and 200 trees per hectare.
 
-The model was designed to take an initial forest with a certain number of trees in designated XY location and with variables age, radius (derived from diameter at breast height), status of the tree (as in dead or alive) and how long a tree was dead for. In each time step, the model included tree groth in size, aging, potential reproduction, potential death and falling of dead trees. 
+The model was designed to take an initial forest with a certain number of trees in designated XY location and model in each time step for each tree, growth in size, aging, potential reproduction, potential death and falling of dead trees. 
 
 Below figure 1 helps understand key elements in the model:
 
-![Fig 1: Diagram of the model](../Images/Tree_cycle.png){width=70%}
+![Fig 1: Diagram of the model](../Images/Tree_cycle.png){width=90%}
 
 Each tree has the following variables associated with it: 
 
@@ -50,6 +51,7 @@ Each tree has the following variables associated with it:
 * d - number of time steps since a tree has died
 
 The parameters used in the modelling of the forest through time are:
+
 * maxTRees – the maximum number of trees the forest/model handles
 * maxx – the maximum size of the forest in terms of x coordinate
 * maxy - the maximum size of the forest in terms of y coordinate
@@ -64,21 +66,33 @@ The parameters used in the modelling of the forest through time are:
 * min_d - minimum distance between trees
 * d_f - number of time steps it takes for a dead tree to "fall"and the space be open for other trees
 
-Two key elements of the model are the distinct mortality rates for young trees (a>3) and the placement of new trees in the available space within the maximum dispersal distance from the parent tree. The model attempted to place the new tree in the available space 50 times and if that was not possible, the tree was then considered dead.
+Key elements of this model are:
+
+* the distinct mortality rates for young trees (a>3).
+* the placement of new trees in the available space within the maximum dispersal distance from the parent tree within a certain distance from other trees.
+* removal of dead trees after a few time steps.
+
+For the placement of new trees, the model attempted to place the new tree in the available space 50 times and if that was not possible, the tree was then considered dead.
 
 The figures below illustrate this spacial element fo the model.
 
-![Fig 2: Dispersal element](../Images/Dispersal.png){width=50%}
 
 
-![Fig 3: Space available for new trees. New trees considered dead after 50 attempts for placement](../Images/Dispersal_death.png){width=50%}
+| ![Fig 2](../Images/Dispersal.png) | ![Fig 3](../Images/Dispersal_death.png){width=83%} |
+|:---------------------------------:|:---------------------------------------:|
+| Fig 2: Dispersal element          |Fig 3: Space available for new trees. New trees considered dead after 50 attempts for placement |
 
-Three different types of initial forests were used:
+
+
+Three different types of initial forests were used to understand the efficacy of the model and also any significant difference in the outcome given different planting approaches. The inital stands were:
+
 * Initial stand of 10 trees randomly placed and with random age and radius.
 * Initial stand of 10 trees planted in 2 rows, with even age and radius.
 * Initial stand of 10 trees planted randomly in the space but with even age and radius.
 
-In addition, a test of the scalability of the model was carried out. For that, an area of 25 hectares was selected with an initial stand of 250 trees (10 per hectare).
+In addition, one of the key parameters was modified, mortality of younger trees to understand how the model would behave.
+
+Lastly, a test of the scalability of the model was carried out. For that, an area of 25 hectares was selected with an initial stand of 250 trees (10 per hectare).
 
 ## The code
 
@@ -235,6 +249,7 @@ simulateForest <- function(iniForest, tmax, p) {
   return(ftt)
 }
 ```
+
 For the scenarios with the planted trees in rows and the planted trees randomly in the space, the code used to establish the initial stand is below:
 
 ```{r code planted, echo=TRUE, message=FALSE, warning=FALSE}
@@ -262,7 +277,7 @@ planted_forest_random <- data.frame(ID    = 1:nini,                             
 
 ```
 
-The code used for the large scale simulation, only differed in the parameter design with 
+The code used for the large scale simulation, only differed in the parameter related to the plot size and also the initial number of trees.
 
 ```{r code_HPC, echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
 tmax <- 70  # number of time steps to simulate
@@ -273,112 +288,50 @@ p$maxx <- 500          # x-size of forest in meters (equals a hectare)
 p$maxy <- 500      
 ```
 
-## Description of the results
+## Results
 
-In terms of density, the random initial forest achieved the density earlier, however that is most likely to do with the fact that all trees from the planted initial forest were 3 years old and in the random one, some trees were much closer to maturity.
+In terms of density, the random initial forest achieved density slightly earlier than the planted ones. However, to understand if this difference is significant, further studies with a relevant number of replicates would need to be designed.  
 
-The two planted forests achieved the desired density at a similar timescale.
+Nonetheless, in all scenarios it took 50 years or more for the desired density to be achieved. That is relevant from a management perspective as over 50 years is a long time to sustain management activities but also because of some carbon farming methodologies have a designated period of only 25 years where trees have to remain uncleared for carbon credits to be generated and registered.
 
-Nonetheless, in all scenarios it took more than 50 years for the desired density to be achieved. That is relevant from a management perspective as over 40 years is a long time to sustain management activities but also because of some carbon farming methodologies have a designated period of only 25 years where trees have to remain uncleared.
+The graph below shows the number of tress through time for the three scenarios.
 
-The graph below shows the number of tress through time for the tree scenarios.
-
-```{r density, echo=FALSE, message=FALSE, warning=FALSE}
-#### run simulation for initial random stand
-simResult <- simulateForest(iniForest, tmax, p)
-# Plotting tree numbers is achieved
-data_r <- data.frame(time = 1:tmax, n_trees = NA)
-
-for (i in 1:tmax) {
-  data_r$n_trees[i] <- sum(simResult[[i + 1]]$alive)
-}
+![Fig 4: Density 3 scenarios](../Plots/Desity3models.jpg)
 
 
-### run simulation for planted fores in rows
-simResult_planted <- simulateForest(planted_forest, tmax, p)
-# Plotting number of trees when density is achieved
-data_prow <- data.frame(time = 1:tmax, n_trees = NA)
 
-for (i in 1:tmax) {
-  data_prow$n_trees[i] <- sum(simResult_planted[[i + 1]]$alive)
-}
+Another interesting result relates to the dispersion of new trees. The dispersal occurred in a way that after more than 50 time steps the distribution of trees was visually homogeneous across the space. That is relevant too as in terms of landscape conservation, outcomes can be potentialised this way.
 
-### run simulation for planted forest random
-simResult_planted_r <- simulateForest(planted_forest_random, tmax, p)
-# Plotting number of trees when density is achieved
-data_prandom <- data.frame(time = 1:tmax, n_trees = NA)
-
-for (i in 1:tmax) {
-  data_prandom$n_trees[i] <- sum(simResult_planted_r[[i + 1]]$alive)
-}
-
-#density plot
-
-ggplot() +
-  geom_line(data = data_r, aes(x = time, y = n_trees, color = "random innitial stand"), linewidth = 0.8) +
-  geom_line(data = data_prow, aes(x = time, y = n_trees, color = "planted in rows"), linewidth = 0.8) +
-  geom_line(data = data_prandom, aes(x = time, y = n_trees, color = "planted random"), linewidth = 0.8) +
-  labs(x = "Time", y = "Number of Trees", colour = "Scenario") +
-  ggtitle("Number of Trees Over Time") +
-  geom_hline(yintercept = 150, linetype = "dashed", colour = "red3") +
-  geom_hline(yintercept = 200, linetype = "dashed", colour = "red3") +
-  scale_colour_manual(values = c("random innitial stand" = "black", "planted in rows" = "blue3","planted random" = "orange2" ),
-                     labels = c("random innitial stand", "planted in rows","planted random"))
-
-```
-
-Another interesting result relates to the dispersion as in all scenarios at the desired density had a visually homogeneous distributions of trees with the area.
-
-![Fig 4: DIspersal random forest](../Images/forest_growth_movie_random_1.gif){width=40%}
-![Fig 5: DIspersal forest planted in rows](../Images/planted_rows.gif){width=40%}
-![Fig 6: DIspersal forest planted randomlly](../Images/planted_random.gif){width=40%}
-In relation to improving survival rate by 5%, that has affected the timing of achieving the desired density by order of XXX.
+|![Fig 5: DIspersal random forest](../Images/forest_growth_movie_random_1.gif) | ![Fig 6: DIspersal forest planted in rows](../Images/planted_rows.gif){width=75%} | ![Fig 7: DIspersal forest planted randomly](../Images/planted_random.gif){width=70%} |
+|:-----------------:|:---------------------------:|:--------------------------:|
+| Fig 5: Dispersal random forest | Fig 6: Dispersal forest planted in rows | Fig 7: Dispersal forest planted randomly |
 
 
-```{r survival, echo=FALSE, message=FALSE, warning=FALSE} 
+In relation to improving survival rate by 10%, that has affected the timing of achieving the desired density by order of 10 years.
 
-# Changing mortality rate
+![Density Improved Survival ](../Plots/Desity_imp_surv.jpg){width=53%}
 
-p$mu_under_3 <- 0.10     # mortality probability for plants under 3 years
 
-#### run simulation for initial random stand improved survival
-simResult_s <- simulateForest(iniForest, tmax, p)
-# Plotting tree numbers is achieved
-data_s <- data.frame(time = 1:tmax, n_trees = NA)
 
-for (i in 1:tmax) {
-  data_s$n_trees[i] <- sum(simResult_s[[i + 1]]$alive)
-}
+The model also behaved similarly when using a large scale plot of 25 hectares with 10 trees per hectare.
 
-#density plot
-
-ggplot() +
-  geom_line(data = data_s, aes(x = time, y = n_trees, color = "improved survival by 5%"), linewidth = 0.8) +
-  labs(x = "Time", y = "Number of Trees", colour = "Scenario") +
-  ggtitle("Number of Trees Over Time") +
-  geom_hline(yintercept = 150, linetype = "dashed", colour = "red3") +
-  geom_hline(yintercept = 200, linetype = "dashed", colour = "red3") +
-  scale_colour_manual(values = c("improved survival by 5%" = "green4"))
-
-```
-
-The model also behaved similarly when using a large scale.
-
-![Fig 7: Modeling of 25 hectares](../Images/forest_growth_movie_25h70t.gif)
-![Fig 8: Modeling of 25 hectares](../Images/Plot_HPC_25h_70.png)
+|![Fig 8: Modeling of 25 hectares](../Images/Plot_HPC_25h_70.png) | ![Fig 9: Modeling of 25 hectares](../Images/forest_growth_movie_25h70t.gif)|
+|:---------------------------------------:|:----------------------------------:|
+| Fig 8: Number of trees overtime 25ha | Fig 9: Dispersal 25ha |
 
 ## Conclusion
 
-Form the modeled results it is possible to conclude that the model scale and the planting approach does not affect the achievement of the desired density.
+From the modeled results it is possible to conclude that the model scale and the planting approach does not affect the achievement of the desired density.
 
-It is also concluded that regardless of the scenario, the density was achieved only after 50 years.
+It is also concluded that regardless of the initial scenario, the density was achieved only after 50 years.
 
-When survival rate of young trees was improved by 10%, the density was achieved in around 4 years. That indicates that management activities that support the survival of younger tree may have a significant impact in achieving the desired density for a certain area.
-
-## References
+When survival rate of young trees was improved by 10%, the density was achieved in around 40 years. That indicates that management activities that support the survival of younger tree may have a significant impact in achieving the desired density for a certain area.
 
 ## Notes
 
-Chat GPT was used to solve some R errors that I had never encountered before.
+Chat GPT was used to solve some R errors that the author has never encountered before.
 
 Data, scripts, images and background info used in this report can be found at [https://github.com/BarbaraDeLoreto/Compt_biol] (https://github.com/BarbaraDeLoreto/Compt_biol)
+
+## References
+
